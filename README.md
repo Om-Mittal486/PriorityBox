@@ -1,8 +1,14 @@
-# 📧 MailWatch — Real-time Email Monitoring Dashboard
+# � PriorityBox — Real-time Email Monitoring Dashboard
 
 A modern full-stack web application that lets you monitor important emails in real-time. Log in with Google, add sender email addresses you care about, and get instant dashboard updates when new emails arrive.
 
 ![Tech Stack](https://img.shields.io/badge/React-Vite-blue) ![Backend](https://img.shields.io/badge/Node.js-Express-green) ![DB](https://img.shields.io/badge/MongoDB-Atlas-brightgreen) ![API](https://img.shields.io/badge/Gmail-API-red)
+
+### ☀️ Light Mode Theme
+![PriorityBox Light Mode Dashboard](screenshots/light-mode.png)
+
+### 🌙 Dark Mode Theme
+![PriorityBox Dark Mode Dashboard](screenshots/dark-mode.png)
 
 ---
 
@@ -11,7 +17,7 @@ A modern full-stack web application that lets you monitor important emails in re
 - **Google OAuth 2.0** — Secure login with Gmail
 - **Sender Management** — Add, edit, delete tracked email addresses
 - **Real-time Email Monitoring** — Polls Gmail every 30s for new emails
-- **Live Dashboard Updates** — Socket.io pushes new emails instantly
+- **Instant Alerts** — Socket.io pushes new emails instantly
 - **Dark / Light Mode** — Toggle with localStorage persistence
 - **Email Preview** — View full email content in a modal
 - **Read/Unread Status** — Mark emails as read/unread
@@ -99,7 +105,7 @@ npm install
 4. **Configure OAuth Consent Screen**:
    - Go to **APIs & Services** → **OAuth consent screen**
    - Select **External** user type
-   - Fill in app name: `MailWatch`
+   - Fill in app name: `PriorityBox`
    - Add your email as support & developer contact
    - On **Scopes** page, add:
      - `https://www.googleapis.com/auth/gmail.readonly`
