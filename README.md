@@ -246,4 +246,4 @@ npm run dev
 
 ## 📄 License
 
-MIT — built with ❤️ for your resume.
+MIT — built just for your important emails.

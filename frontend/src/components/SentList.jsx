@@ -1,5 +1,20 @@
 import { useTheme } from '../context/ThemeContext';
+import { motion } from 'framer-motion';
 import { HiOutlineDocumentText, HiOutlineClock, HiOutlineEye } from 'react-icons/hi';
+import clsx from 'clsx';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.05 }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+};
 
 const SentList = ({ replies, loading, onReplyClick }) => {
     const { isDark } = useTheme();
@@ -44,18 +59,24 @@ const SentList = ({ replies, loading, onReplyClick }) => {
     }
 
     return (
-        <div className="space-y-2">
+        <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-3"
+        >
             {replies.map((reply, idx) => (
-                <div
+                <motion.div
                     key={reply._id}
+                    variants={itemVariants}
                     onClick={() => onReplyClick(reply)}
-                    className={`group relative p-4 rounded-xl cursor-pointer transition-all duration-200 animate-fade-in ${isDark
-                            ? 'bg-dark-900/50 hover:bg-dark-800 border border-dark-700/50 hover:border-dark-600'
-                            : 'bg-white hover:bg-dark-50 border border-dark-200/80 hover:border-dark-300 hover:shadow-sm'
-                        }`}
-                    style={{ animationDelay: `${idx * 30}ms` }}
+                    className={clsx(
+                        "group relative p-4 cursor-pointer transition-all duration-300 neo-border neo-hover-card",
+                        isDark ? "bg-[#1B1B1B] text-white" : "bg-white text-black",
+                        "hover:-translate-y-1"
+                    )}
                 >
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-4">
                         {/* Avatar */}
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-sm font-bold ${isDark ? 'bg-dark-700 text-dark-400' : 'bg-dark-200 text-dark-500'
                             }`}>
@@ -94,18 +115,18 @@ const SentList = ({ replies, loading, onReplyClick }) => {
                     </div>
 
                     {/* Hover actions */}
-                    <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-3 right-3 flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                             onClick={(e) => { e.stopPropagation(); onReplyClick(reply); }}
                             title="View reply"
-                            className={`p-1.5 rounded-lg transition-colors ${isDark ? 'hover:bg-dark-700 text-dark-400' : 'hover:bg-dark-100 text-dark-500'}`}
+                            className="p-2 transition-colors neo-border neo-shadow-sm bg-white dark:bg-[#1B1B1B] text-black dark:text-white hover:bg-[#90A8FF] dark:hover:bg-[#90A8FF] dark:hover:text-black"
                         >
-                            <HiOutlineEye className="w-4 h-4" />
+                            <HiOutlineEye className="w-5 h-5" />
                         </button>
                     </div>
-                </div>
+                </motion.div>
             ))}
-        </div>
+        </motion.div>
     );
 };
 

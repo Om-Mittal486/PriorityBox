@@ -84,9 +84,9 @@ const EmailModal = ({ email, onClose, onToggleRead }) => {
             />
 
             {/* Modal */}
-            <div className={`relative w-full max-w-2xl max-h-[85vh] rounded-2xl overflow-hidden flex flex-col animate-fade-in ${isDark ? 'bg-dark-900 border border-dark-700' : 'bg-white shadow-2xl'}`}>
+            <div className={`relative w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col animate-fade-in neo-border neo-shadow transition-colors duration-300 ${isDark ? 'bg-[#1B1B1B] text-white' : 'bg-white text-black'}`}>
                 {/* Header */}
-                <div className={`sticky top-0 z-10 flex items-start justify-between p-5 border-b ${isDark ? 'bg-dark-900 border-dark-700' : 'bg-white border-dark-200'}`}>
+                <div className={`sticky top-0 z-10 flex items-start justify-between p-6 border-b-[3px] transition-colors ${isDark ? 'border-white/10 bg-[#1B1B1B]' : 'border-black bg-white'}`}>
                     <div className="flex-1 min-w-0 pr-4">
                         <h2 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-dark-900'}`}>
                             {email.subject}
@@ -94,7 +94,7 @@ const EmailModal = ({ email, onClose, onToggleRead }) => {
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
                             <div className="flex items-center gap-1.5">
                                 <HiOutlineUser className={`w-4 h-4 ${isDark ? 'text-dark-400' : 'text-dark-500'}`} />
-                                <span className={`text-sm ${isDark ? 'text-dark-300' : 'text-dark-600'}`}>
+                                <span className={`text-sm font-bold ${isDark ? 'text-dark-300' : 'text-dark-600'}`}>
                                     {email.fromName ? `${email.fromName} <${email.from}>` : email.from}
                                 </span>
                             </div>
@@ -141,7 +141,7 @@ const EmailModal = ({ email, onClose, onToggleRead }) => {
 
                 {/* Reply Section */}
                 {showReply && (
-                    <div className={`border-t p-4 animate-fade-in ${isDark ? 'bg-dark-850 border-dark-700' : 'bg-dark-50 border-dark-200'}`}>
+                    <div className={`border-t-[3px] p-5 animate-fade-in ${isDark ? 'bg-[#1B1B1B] border-white/10' : 'bg-white border-black'}`}>
                         {/* Success message */}
                         {replyStatus === 'success' && (
                             <div className="flex items-center gap-2 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500 text-sm mb-3">
@@ -168,9 +168,9 @@ const EmailModal = ({ email, onClose, onToggleRead }) => {
                                     onChange={(e) => setReplyBody(e.target.value)}
                                     placeholder="Type your reply..."
                                     rows={4}
-                                    className={`w-full px-3.5 py-2.5 rounded-xl text-sm outline-none resize-none transition-all duration-200 ${isDark
-                                        ? 'bg-dark-800 border border-dark-600 text-white placeholder-dark-500 focus:border-primary-500'
-                                        : 'bg-white border border-dark-200 text-dark-900 placeholder-dark-400 focus:border-primary-500'
+                                    className={`w-full px-4 py-3 text-base font-medium outline-none resize-none transition-all duration-200 neo-border ${isDark
+                                        ? 'bg-[#111] text-white placeholder-dark-500 focus:bg-[#222]'
+                                        : 'bg-[#EAE6DF] text-black placeholder-dark-500 focus:bg-white'
                                         }`}
                                     autoFocus
                                     disabled={sending}
@@ -179,19 +179,19 @@ const EmailModal = ({ email, onClose, onToggleRead }) => {
                                     <button
                                         onClick={handleCancelReply}
                                         disabled={sending}
-                                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${isDark ? 'bg-dark-800 text-dark-300 hover:bg-dark-700' : 'bg-dark-200 text-dark-600 hover:bg-dark-300'}`}
+                                        className={`px-5 py-3 text-sm font-bold uppercase tracking-widest transition-colors neo-border ${isDark ? 'bg-[#1B1B1B] text-white hover:bg-white hover:text-black' : 'bg-white text-black hover:bg-black hover:text-white'}`}
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleSendReply}
                                         disabled={sending || !replyBody.trim()}
-                                        className="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex items-center gap-2 px-6 py-3 bg-[#FF90E8] text-black text-sm uppercase tracking-widest font-black neo-border neo-shadow-sm neo-active-btn disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {sending ? (
-                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            <div className="w-5 h-5 border-[3px] border-black border-t-transparent rounded-full animate-spin" />
                                         ) : (
-                                            <HiOutlineReply className="w-4 h-4" />
+                                            <HiOutlineReply className="w-5 h-5" />
                                         )}
                                         {sending ? 'Sending...' : 'Send Reply'}
                                     </button>
@@ -202,29 +202,29 @@ const EmailModal = ({ email, onClose, onToggleRead }) => {
                 )}
 
                 {/* Footer */}
-                <div className={`sticky bottom-0 flex items-center justify-between p-4 border-t ${isDark ? 'bg-dark-900 border-dark-700' : 'bg-dark-50 border-dark-200'}`}>
+                <div className={`sticky bottom-0 flex items-center justify-between p-5 border-t-[3px] transition-colors ${isDark ? 'border-white/10 bg-[#1B1B1B]' : 'border-black bg-white'}`}>
                     <div className="flex items-center gap-2">
-                        <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full ${email.isRead
-                            ? isDark ? 'bg-dark-800 text-dark-400' : 'bg-dark-200 text-dark-500'
-                            : 'bg-primary-500/10 text-primary-500'
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest px-3 py-1.5 border-2 border-black ${email.isRead
+                            ? isDark ? 'bg-white text-black' : 'bg-black text-white'
+                            : 'bg-[#FFC900] text-black'
                             }`}>
-                            {email.isRead ? <HiOutlineMailOpen className="w-3 h-3" /> : <HiOutlineMail className="w-3 h-3" />}
+                            {email.isRead ? <HiOutlineMailOpen className="w-4 h-4" /> : <HiOutlineMail className="w-4 h-4" />}
                             {email.isRead ? 'Read' : 'Unread'}
                         </span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         {!showReply && (
                             <button
                                 onClick={() => { setShowReply(true); setReplyStatus(null); }}
-                                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-all duration-200"
+                                className="flex items-center gap-2 px-6 py-3 bg-[#FF90E8] text-black text-sm uppercase tracking-widest font-black neo-border neo-shadow-sm neo-active-btn transition-all duration-200"
                             >
-                                <HiOutlineReply className="w-4 h-4" />
+                                <HiOutlineReply className="w-5 h-5" />
                                 Reply
                             </button>
                         )}
                         <button
                             onClick={onClose}
-                            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${isDark ? 'bg-dark-800 text-dark-300 hover:bg-dark-700' : 'bg-dark-200 text-dark-600 hover:bg-dark-300'}`}
+                            className={`px-6 py-3 text-sm font-bold uppercase tracking-widest transition-colors neo-border neo-shadow-sm neo-active-btn ${isDark ? 'bg-[#1B1B1B] text-white hover:bg-white hover:text-black' : 'bg-white text-black hover:bg-black hover:text-white'}`}
                         >
                             Close
                         </button>

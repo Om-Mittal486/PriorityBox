@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import clsx from 'clsx';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useSocket } from '../context/SocketContext';
@@ -103,7 +105,7 @@ const Dashboard = () => {
 
             // Browser notification
             if (Notification.permission === 'granted') {
-                new Notification('MailWatch — New Email', {
+                new Notification('PriorityBox — New Email', {
                     body: `From: ${data.email.fromName || data.email.from}\n${data.email.subject}`,
                     icon: '/vite.svg',
                 });
@@ -195,120 +197,167 @@ const Dashboard = () => {
     if (!user) return null;
 
     return (
-        <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-dark-950' : 'bg-dark-50'}`}>
-            <Navbar unreadCount={unreadCount} />
+        <div className={clsx(
+            "min-h-screen transition-colors duration-500 relative overflow-hidden",
+            isDark ? "bg-[var(--color-neo-dark-bg)] text-white" : "bg-[var(--color-neo-bg)] text-[var(--color-neo-border)]"
+        )}>
+            {/* Geometric Background Grid (Optional brutalist touch) */}
+            <div className={clsx(
+                "absolute inset-0 pointer-events-none opacity-[0.03]",
+                isDark ? "invert" : ""
+            )} style={{ backgroundImage: 'radial-gradient(circle, #000 2px, transparent 2.5px)', backgroundSize: '32px 32px' }}></div>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div className="flex flex-col lg:flex-row gap-6">
-                    {/* Sidebar — Sender Manager */}
-                    <aside className="w-full lg:w-80 shrink-0">
-                        <SenderManager onSenderDeleted={() => fetchEmails(1, false)} />
-                    </aside>
+            <div className="relative z-10 flex flex-col min-h-screen">
+                <Navbar unreadCount={unreadCount} />
 
-                    {/* Main — Email List */}
-                    <section className="flex-1 min-w-0">
-                        {/* Tabs & Actions */}
-                        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6`}>
-                            {/* Tabs */}
-                            <div className={`inline-flex p-1 rounded-xl ${isDark ? 'bg-dark-900 border border-dark-700' : 'bg-dark-100'}`}>
-                                <button
-                                    onClick={() => setActiveTab('inbox')}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'inbox'
-                                            ? isDark ? 'bg-dark-700 text-white shadow-sm' : 'bg-white text-dark-900 shadow-sm'
-                                            : isDark ? 'text-dark-400 hover:text-dark-200' : 'text-dark-500 hover:text-dark-700'
-                                        }`}
-                                >
-                                    <HiOutlineInbox className="w-4 h-4" />
-                                    Inbox
-                                    {unreadCount > 0 && (
-                                        <span className={`px-1.5 min-w-[1.25rem] text-center py-0.5 rounded-full text-[10px] ${activeTab === 'inbox'
-                                                ? 'bg-primary-500 text-white'
-                                                : isDark ? 'bg-dark-800 text-primary-400' : 'bg-dark-200 text-primary-600'
-                                            }`}>
-                                            {unreadCount}
-                                        </span>
+                <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+                    <div className="flex flex-col lg:flex-row gap-8">
+                        {/* Sidebar — Sender Manager */}
+                        <aside className="w-full lg:w-80 shrink-0">
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.5, delay: 0.1 }}
+                            >
+                                <SenderManager onSenderDeleted={() => fetchEmails(1, false)} />
+                            </motion.div>
+                        </aside>
+
+                        {/* Main — Email List */}
+                        <motion.section
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="flex-1 min-w-0"
+                        >
+                            {/* Tabs & Actions */}
+                            <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6`}>
+                                {/* Tabs */}
+                                <div className={clsx(
+                                    "relative inline-flex flex-wrap p-1.5 neo-border neo-shadow-sm gap-2",
+                                    isDark ? "bg-[#1B1B1B]" : "bg-white"
+                                )}>
+                                    {[
+                                        { id: 'inbox', label: 'Inbox', icon: HiOutlineInbox, count: unreadCount },
+                                        { id: 'sent', label: 'Sent', icon: HiOutlinePaperAirplane }
+                                    ].map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            className={clsx(
+                                                "relative flex items-center gap-2 px-5 py-2.5 text-sm font-black uppercase tracking-wider transition-colors z-10 neo-border",
+                                                activeTab === tab.id
+                                                    ? isDark ? "bg-[#90A8FF] text-black border-transparent" : "bg-[#FFC900] text-black border-transparent"
+                                                    : isDark ? "bg-transparent text-white border-transparent hover:bg-white/10" : "bg-transparent text-black border-transparent hover:bg-black/5"
+                                            )}
+                                        >
+                                            <tab.icon className="w-5 h-5" />
+                                            {tab.label}
+                                            {tab.id === 'inbox' && tab.count > 0 && (
+                                                <span className={clsx(
+                                                    "px-2 min-w-[1.5rem] text-center py-0.5 text-[11px] ml-1 transition-colors border-2 border-black",
+                                                    activeTab === 'inbox'
+                                                        ? 'bg-black text-white'
+                                                        : isDark ? 'bg-white text-black' : 'bg-black text-white'
+                                                )}>
+                                                    {tab.count}
+                                                </span>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    {activeTab === 'inbox' && unreadCount > 0 && (
+                                        <button
+                                            onClick={handleMarkAllRead}
+                                            className={clsx(
+                                                "flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold uppercase tracking-widest transition-all neo-border neo-shadow-sm neo-active-btn",
+                                                isDark ? "bg-[#1B1B1B] text-white" : "bg-white text-black"
+                                            )}
+                                        >
+                                            <HiOutlineCheckCircle className="w-5 h-5" />
+                                            Mark all read
+                                        </button>
                                     )}
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('sent')}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'sent'
-                                            ? isDark ? 'bg-dark-700 text-white shadow-sm' : 'bg-white text-dark-900 shadow-sm'
-                                            : isDark ? 'text-dark-400 hover:text-dark-200' : 'text-dark-500 hover:text-dark-700'
-                                        }`}
-                                >
-                                    <HiOutlinePaperAirplane className="w-4 h-4" />
-                                    Sent
-                                </button>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                {activeTab === 'inbox' && unreadCount > 0 && (
                                     <button
-                                        onClick={handleMarkAllRead}
-                                        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${isDark ? 'bg-dark-800 text-dark-300 hover:bg-dark-700' : 'bg-white text-dark-600 hover:bg-dark-100 border border-dark-200'}`}
+                                        onClick={handleRefresh}
+                                        disabled={refreshing}
+                                        className={clsx(
+                                            "flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold uppercase tracking-widest transition-all neo-border neo-shadow-sm neo-active-btn",
+                                            isDark ? "bg-[#1B1B1B] text-white" : "bg-[#90A8FF] text-black"
+                                        )}
                                     >
-                                        <HiOutlineCheckCircle className="w-4 h-4" />
-                                        Mark all read
+                                        <HiOutlineRefresh className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+                                        Refresh
                                     </button>
-                                )}
-                                <button
-                                    onClick={handleRefresh}
-                                    disabled={refreshing}
-                                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${isDark ? 'bg-dark-800 text-dark-300 hover:bg-dark-700' : 'bg-white text-dark-600 hover:bg-dark-100 border border-dark-200'}`}
-                                >
-                                    <HiOutlineRefresh className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                                    Refresh
-                                </button>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* List Area */}
-                        {activeTab === 'inbox' ? (
-                            <EmailList
-                                emails={emails}
-                                loading={loading}
-                                onEmailClick={handleEmailClick}
-                                onToggleRead={handleToggleRead}
-                            />
-                        ) : (
-                            <SentList
-                                replies={replies}
-                                loading={loading}
-                                onReplyClick={setSelectedReply}
-                            />
-                        )}
-
-                        {/* Load more */}
-                        {pagination && page < pagination.pages && (
-                            <div className="text-center mt-6">
-                                <button
-                                    onClick={handleLoadMore}
-                                    className={`px-6 py-2.5 rounded-xl text-sm font-medium transition-all ${isDark ? 'bg-dark-800 text-dark-300 hover:bg-dark-700' : 'bg-white text-dark-600 hover:bg-dark-100 border border-dark-200'}`}
+                            {/* List Area */}
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={activeTab}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.2 }}
                                 >
-                                    Load more emails
-                                </button>
-                            </div>
-                        )}
-                    </section>
-                </div>
-            </main>
+                                    {activeTab === 'inbox' ? (
+                                        <EmailList
+                                            emails={emails}
+                                            loading={loading}
+                                            onEmailClick={handleEmailClick}
+                                            onToggleRead={handleToggleRead}
+                                        />
+                                    ) : (
+                                        <SentList
+                                            replies={replies}
+                                            loading={loading}
+                                            onReplyClick={setSelectedReply}
+                                        />
+                                    )}
+                                </motion.div>
+                            </AnimatePresence>
 
-            {/* Email Modal */}
-            {selectedEmail && (
-                <EmailModal
-                    email={selectedEmail}
-                    onClose={() => setSelectedEmail(null)}
-                    onToggleRead={handleToggleRead}
-                />
-            )}
+                            {/* Load more */}
+                            {pagination && page < pagination.pages && (
+                                <div className="text-center mt-10">
+                                    <button
+                                        onClick={handleLoadMore}
+                                        className={clsx(
+                                            "px-8 py-4 text-sm font-black uppercase tracking-widest transition-all neo-border neo-shadow neo-active-btn",
+                                            isDark ? "bg-[#EAE6DF] text-black" : "bg-[#FF90E8] text-black",
+                                            "hover:-translate-y-1"
+                                        )}
+                                    >
+                                        Load more {activeTab === 'inbox' ? 'emails' : 'replies'}
+                                    </button>
+                                </div>
+                            )}
+                        </motion.section>
+                    </div>
+                </main>
 
-            {/* Sent Modal */}
-            {selectedReply && (
-                <SentModal
-                    reply={selectedReply}
-                    onClose={() => setSelectedReply(null)}
-                />
-            )}
+                {/* Email Modal */}
+                <AnimatePresence>
+                    {selectedEmail && (
+                        <EmailModal
+                            email={selectedEmail}
+                            onClose={() => setSelectedEmail(null)}
+                            onToggleRead={handleToggleRead}
+                        />
+                    )}
+
+                    {/* Sent Modal */}
+                    {selectedReply && (
+                        <SentModal
+                            reply={selectedReply}
+                            onClose={() => setSelectedReply(null)}
+                        />
+                    )}
+                </AnimatePresence>
+            </div>
         </div>
     );
 };

@@ -42,9 +42,9 @@ const SentModal = ({ reply, onClose }) => {
             />
 
             {/* Modal */}
-            <div className={`relative w-full max-w-2xl max-h-[85vh] rounded-2xl overflow-hidden flex flex-col animate-fade-in ${isDark ? 'bg-dark-900 border border-dark-700' : 'bg-white shadow-2xl'}`}>
+            <div className={`relative w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col animate-fade-in neo-border neo-shadow transition-colors duration-300 ${isDark ? 'bg-[#1B1B1B] text-white' : 'bg-white text-black'}`}>
                 {/* Header */}
-                <div className={`sticky top-0 z-10 flex items-start justify-between p-5 border-b ${isDark ? 'bg-dark-900 border-dark-700' : 'bg-white border-dark-200'}`}>
+                <div className={`sticky top-0 z-10 flex items-start justify-between p-6 border-b-[3px] transition-colors ${isDark ? 'border-white/10 bg-[#1B1B1B]' : 'border-black bg-white'}`}>
                     <div className="flex-1 min-w-0 pr-4">
                         <div className="flex items-center gap-2 mb-2">
                             <span className={`text-xs px-2 py-1 rounded-md font-semibold ${isDark ? 'bg-primary-900/30 text-primary-400 border border-primary-500/20' : 'bg-primary-50 text-primary-600 border border-primary-100'}`}>
@@ -104,10 +104,10 @@ const SentModal = ({ reply, onClose }) => {
                 </div>
 
                 {/* Footer */}
-                <div className={`sticky bottom-0 flex items-center justify-end p-4 border-t ${isDark ? 'bg-dark-900 border-dark-700' : 'bg-dark-50 border-dark-200'}`}>
+                <div className={`sticky bottom-0 flex items-center justify-end p-5 border-t-[3px] transition-colors ${isDark ? 'border-white/10 bg-[#1B1B1B]' : 'border-black bg-white'}`}>
                     <button
                         onClick={onClose}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${isDark ? 'bg-dark-800 text-dark-300 hover:bg-dark-700' : 'bg-dark-200 text-dark-600 hover:bg-dark-300'}`}
+                        className={`px-6 py-3 text-sm font-bold uppercase tracking-widest transition-colors neo-border neo-shadow-sm neo-active-btn ${isDark ? 'bg-[#1B1B1B] text-white hover:bg-white hover:text-black' : 'bg-white text-black hover:bg-black hover:text-white'}`}
                     >
                         Close
                     </button>
