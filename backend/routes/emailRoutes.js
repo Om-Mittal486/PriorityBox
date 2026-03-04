@@ -6,13 +6,19 @@ const {
     getEmail,
     toggleRead,
     markAllRead,
+    refreshEmails,
+    replyToEmail,
+    getReplies,
 } = require('../controllers/emailController');
 
 router.use(auth);
 
 router.get('/', getEmails);
+router.get('/replies', getReplies);
+router.post('/refresh', refreshEmails);
 router.patch('/mark-all-read', markAllRead);
 router.get('/:id', getEmail);
 router.patch('/:id/read', toggleRead);
+router.post('/:id/reply', replyToEmail);
 
 module.exports = router;

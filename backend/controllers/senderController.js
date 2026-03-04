@@ -1,4 +1,5 @@
 const Sender = require('../models/Sender');
+const Email = require('../models/Email');
 
 /**
  * GET /api/senders
@@ -93,7 +94,7 @@ const updateSender = async (req, res) => {
 
 /**
  * DELETE /api/senders/:id
- * Delete a sender
+ * Delete a sender and all associated emails
  */
 const deleteSender = async (req, res) => {
     try {
@@ -106,7 +107,16 @@ const deleteSender = async (req, res) => {
             return res.status(404).json({ message: 'Sender not found' });
         }
 
-        res.json({ message: 'Sender deleted successfully' });
+        // Cascade-delete all emails from this sender
+        const deleteResult = await Email.deleteMany({
+            userId: req.userId,
+            from: sender.email,
+        });
+
+        res.json({
+            message: 'Sender deleted successfully',
+            emailsDeleted: deleteResult.deletedCount,
+        });
     } catch (error) {
         res.status(500).json({ message: 'Failed to delete sender' });
     }

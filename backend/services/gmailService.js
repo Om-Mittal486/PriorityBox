@@ -63,6 +63,7 @@ const getAuthUrl = () => {
             'https://www.googleapis.com/auth/userinfo.profile',
             'https://www.googleapis.com/auth/userinfo.email',
             'https://www.googleapis.com/auth/gmail.readonly',
+            'https://www.googleapis.com/auth/gmail.send',
         ],
     });
 };
@@ -152,6 +153,7 @@ const parseGmailMessage = (message) => {
     const from = getHeader('From');
     const subject = getHeader('Subject') || '(No Subject)';
     const date = getHeader('Date');
+    const messageId = getHeader('Message-ID') || getHeader('Message-Id') || '';
 
     // Extract email address from "Name <email>" format
     const emailMatch = from.match(/<(.+?)>/);
@@ -166,6 +168,8 @@ const parseGmailMessage = (message) => {
 
     return {
         gmailId: message.id,
+        threadId: message.threadId || '',
+        messageId,
         from: fromEmail,
         fromName: fromName.replace(/"/g, ''),
         subject,
@@ -212,6 +216,81 @@ const extractBody = (payload) => {
     return '';
 };
 
+/**
+ * Send a reply to an email via Gmail API
+ */
+const sendReply = async (user, originalEmail, replyBody) => {
+    try {
+        const oauth2Client = await getAuthenticatedClient(user);
+        const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+
+        // Build the "To" address
+        const toAddress = originalEmail.fromName
+            ? `${originalEmail.fromName} <${originalEmail.from}>`
+            : originalEmail.from;
+
+        // Build subject with Re: prefix
+        const subject = originalEmail.subject.startsWith('Re:')
+            ? originalEmail.subject
+            : `Re: ${originalEmail.subject}`;
+
+        // Use the RFC Message-ID for In-Reply-To / References headers
+        const refId = originalEmail.messageId || `${originalEmail.gmailId}@mail.gmail.com`;
+        const inReplyTo = refId.startsWith('<') ? refId : `<${refId}>`;
+
+        // Construct RFC 2822 email with reply headers
+        const messageParts = [
+            `From: ${user.email}`,
+            `To: ${toAddress}`,
+            `Subject: ${subject}`,
+            `In-Reply-To: ${inReplyTo}`,
+            `References: ${inReplyTo}`,
+            'Content-Type: text/plain; charset="UTF-8"',
+            'MIME-Version: 1.0',
+            '',
+            replyBody,
+        ];
+
+        const rawMessage = messageParts.join('\r\n');
+
+        // Base64url encode the message
+        const encodedMessage = Buffer.from(rawMessage)
+            .toString('base64')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+
+        // Use threadId for proper Gmail threading (fall back to gmailId if threadId not stored)
+        const threadId = originalEmail.threadId || undefined;
+
+        // Send the reply
+        const sendRequest = {
+            userId: 'me',
+            requestBody: {
+                raw: encodedMessage,
+            },
+        };
+
+        // Only include threadId if available
+        if (threadId) {
+            sendRequest.requestBody.threadId = threadId;
+        }
+
+        const response = await gmail.users.messages.send(sendRequest);
+
+        return response.data;
+    } catch (error) {
+        console.error('Error sending reply:', error.message);
+        if (error.response) {
+            console.error('Gmail API error details:', JSON.stringify(error.response.data, null, 2));
+        }
+        if (error.code === 401 || error.code === 403) {
+            throw new Error('AUTH_ERROR');
+        }
+        throw error;
+    }
+};
+
 module.exports = {
     createOAuth2Client,
     getAuthenticatedClient,
@@ -220,4 +299,5 @@ module.exports = {
     getUserProfile,
     fetchEmailsFromSenders,
     parseGmailMessage,
+    sendReply,
 };

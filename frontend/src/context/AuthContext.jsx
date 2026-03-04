@@ -48,6 +48,7 @@ export const AuthProvider = ({ children }) => {
     // Start Google OAuth redirect
     const loginWithGoogle = useCallback(async () => {
         try {
+            setError(null); // Clear any stale errors before attempting login
             const { data } = await api.get('/auth/google');
             window.location.href = data.url;
         } catch (err) {

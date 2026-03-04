@@ -11,6 +11,14 @@ const emailSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        threadId: {
+            type: String,
+            default: '',
+        },
+        messageId: {
+            type: String,
+            default: '',
+        },
         from: {
             type: String,
             required: true,

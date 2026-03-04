@@ -7,9 +7,11 @@ import Navbar from '../components/Navbar';
 import SenderManager from '../components/SenderManager';
 import EmailList from '../components/EmailList';
 import EmailModal from '../components/EmailModal';
+import SentList from '../components/SentList';
+import SentModal from '../components/SentModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import api from '../services/api';
-import { HiOutlineRefresh, HiOutlineCheckCircle, HiOutlineInbox } from 'react-icons/hi';
+import { HiOutlineRefresh, HiOutlineCheckCircle, HiOutlineInbox, HiOutlinePaperAirplane } from 'react-icons/hi';
 
 // Notification sound (base64 encoded short beep)
 const NOTIFICATION_SOUND = 'data:audio/wav;base64,UklGRl9vT19teleVmZXQAAAABAAEAIlYAAEhYAAABAAgAZGF0YU0AAAB/f39/f39/f39/f39/f39/f39/f39/f39/f39/';
@@ -21,12 +23,15 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     const [emails, setEmails] = useState([]);
+    const [replies, setReplies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [unreadCount, setUnreadCount] = useState(0);
     const [selectedEmail, setSelectedEmail] = useState(null);
+    const [selectedReply, setSelectedReply] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState(null);
+    const [activeTab, setActiveTab] = useState('inbox'); // 'inbox' | 'sent'
 
     const notificationAudioRef = useRef(null);
 
@@ -43,6 +48,7 @@ const Dashboard = () => {
 
     // Fetch emails
     const fetchEmails = useCallback(async (pageNum = 1, append = false) => {
+        setLoading(true);
         try {
             const { data } = await api.get(`/emails?page=${pageNum}&limit=20`);
             setEmails(prev => append ? [...prev, ...data.emails] : data.emails);
@@ -56,9 +62,31 @@ const Dashboard = () => {
         }
     }, []);
 
+    // Fetch sent replies
+    const fetchReplies = useCallback(async (pageNum = 1, append = false) => {
+        setLoading(true);
+        try {
+            const { data } = await api.get(`/emails/replies?page=${pageNum}&limit=20`);
+            setReplies(prev => append ? [...prev, ...data.replies] : data.replies);
+            setPagination(data.pagination);
+        } catch (err) {
+            console.error('Failed to fetch replies:', err);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, []);
+
     useEffect(() => {
-        if (user) fetchEmails();
-    }, [user, fetchEmails]);
+        if (user) {
+            setPage(1);
+            if (activeTab === 'inbox') {
+                fetchEmails(1, false);
+            } else {
+                fetchReplies(1, false);
+            }
+        }
+    }, [user, activeTab, fetchEmails, fetchReplies]);
 
     // Real-time email updates via Socket.io
     useEffect(() => {
@@ -94,9 +122,28 @@ const Dashboard = () => {
     }, []);
 
     // Handlers
-    const handleRefresh = () => {
+    const handleRefresh = async () => {
         setRefreshing(true);
-        fetchEmails(1, false);
+        try {
+            if (activeTab === 'inbox') {
+                // Trigger a live Gmail poll and get updated emails
+                const { data } = await api.post('/emails/refresh');
+                setEmails(data.emails);
+                setPagination(data.pagination);
+                setUnreadCount(data.unreadCount);
+                setPage(1);
+            } else {
+                await fetchReplies(1, false);
+            }
+        } catch (err) {
+            console.error('Refresh failed:', err);
+            // Fallback: just re-fetch from database
+            if (activeTab === 'inbox') {
+                await fetchEmails(1, false);
+            }
+        } finally {
+            setRefreshing(false);
+        }
     };
 
     const handleToggleRead = async (emailId) => {
@@ -126,7 +173,11 @@ const Dashboard = () => {
         if (pagination && page < pagination.pages) {
             const nextPage = page + 1;
             setPage(nextPage);
-            fetchEmails(nextPage, true);
+            if (activeTab === 'inbox') {
+                fetchEmails(nextPage, true);
+            } else {
+                fetchReplies(nextPage, true);
+            }
         }
     };
 
@@ -151,25 +202,47 @@ const Dashboard = () => {
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* Sidebar — Sender Manager */}
                     <aside className="w-full lg:w-80 shrink-0">
-                        <SenderManager />
+                        <SenderManager onSenderDeleted={() => fetchEmails(1, false)} />
                     </aside>
 
                     {/* Main — Email List */}
                     <section className="flex-1 min-w-0">
-                        {/* Email header */}
-                        <div className={`flex items-center justify-between mb-4`}>
-                            <div className="flex items-center gap-3">
-                                <HiOutlineInbox className={`w-6 h-6 ${isDark ? 'text-primary-400' : 'text-primary-600'}`} />
-                                <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-dark-900'}`}>Inbox</h2>
-                                {unreadCount > 0 && (
-                                    <span className="px-2.5 py-1 rounded-full bg-primary-500/10 text-primary-500 text-xs font-bold">
-                                        {unreadCount} new
-                                    </span>
-                                )}
+                        {/* Tabs & Actions */}
+                        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6`}>
+                            {/* Tabs */}
+                            <div className={`inline-flex p-1 rounded-xl ${isDark ? 'bg-dark-900 border border-dark-700' : 'bg-dark-100'}`}>
+                                <button
+                                    onClick={() => setActiveTab('inbox')}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'inbox'
+                                            ? isDark ? 'bg-dark-700 text-white shadow-sm' : 'bg-white text-dark-900 shadow-sm'
+                                            : isDark ? 'text-dark-400 hover:text-dark-200' : 'text-dark-500 hover:text-dark-700'
+                                        }`}
+                                >
+                                    <HiOutlineInbox className="w-4 h-4" />
+                                    Inbox
+                                    {unreadCount > 0 && (
+                                        <span className={`px-1.5 min-w-[1.25rem] text-center py-0.5 rounded-full text-[10px] ${activeTab === 'inbox'
+                                                ? 'bg-primary-500 text-white'
+                                                : isDark ? 'bg-dark-800 text-primary-400' : 'bg-dark-200 text-primary-600'
+                                            }`}>
+                                            {unreadCount}
+                                        </span>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('sent')}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'sent'
+                                            ? isDark ? 'bg-dark-700 text-white shadow-sm' : 'bg-white text-dark-900 shadow-sm'
+                                            : isDark ? 'text-dark-400 hover:text-dark-200' : 'text-dark-500 hover:text-dark-700'
+                                        }`}
+                                >
+                                    <HiOutlinePaperAirplane className="w-4 h-4" />
+                                    Sent
+                                </button>
                             </div>
 
                             <div className="flex items-center gap-2">
-                                {unreadCount > 0 && (
+                                {activeTab === 'inbox' && unreadCount > 0 && (
                                     <button
                                         onClick={handleMarkAllRead}
                                         className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${isDark ? 'bg-dark-800 text-dark-300 hover:bg-dark-700' : 'bg-white text-dark-600 hover:bg-dark-100 border border-dark-200'}`}
@@ -189,13 +262,21 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        {/* Email list */}
-                        <EmailList
-                            emails={emails}
-                            loading={loading}
-                            onEmailClick={handleEmailClick}
-                            onToggleRead={handleToggleRead}
-                        />
+                        {/* List Area */}
+                        {activeTab === 'inbox' ? (
+                            <EmailList
+                                emails={emails}
+                                loading={loading}
+                                onEmailClick={handleEmailClick}
+                                onToggleRead={handleToggleRead}
+                            />
+                        ) : (
+                            <SentList
+                                replies={replies}
+                                loading={loading}
+                                onReplyClick={setSelectedReply}
+                            />
+                        )}
 
                         {/* Load more */}
                         {pagination && page < pagination.pages && (
@@ -218,6 +299,14 @@ const Dashboard = () => {
                     email={selectedEmail}
                     onClose={() => setSelectedEmail(null)}
                     onToggleRead={handleToggleRead}
+                />
+            )}
+
+            {/* Sent Modal */}
+            {selectedReply && (
+                <SentModal
+                    reply={selectedReply}
+                    onClose={() => setSelectedReply(null)}
                 />
             )}
         </div>

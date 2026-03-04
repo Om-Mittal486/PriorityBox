@@ -3,7 +3,7 @@ import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck, HiOutli
 import { useTheme } from '../context/ThemeContext';
 import api from '../services/api';
 
-const SenderManager = () => {
+const SenderManager = ({ onSenderDeleted }) => {
     const { isDark } = useTheme();
     const [senders, setSenders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -59,10 +59,12 @@ const SenderManager = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm('Remove this sender?')) return;
+        if (!confirm('Remove this sender and all their emails?')) return;
         try {
             await api.delete(`/senders/${id}`);
             setSenders(prev => prev.filter(s => s._id !== id));
+            // Notify parent to re-fetch emails since associated emails were deleted
+            if (onSenderDeleted) onSenderDeleted();
         } catch (err) {
             setError('Failed to delete sender');
         }
