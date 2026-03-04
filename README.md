@@ -4,12 +4,10 @@ A modern full-stack web application that lets you monitor important emails in re
 
 ![Tech Stack](https://img.shields.io/badge/React-Vite-blue) ![Backend](https://img.shields.io/badge/Node.js-Express-green) ![DB](https://img.shields.io/badge/MongoDB-Atlas-brightgreen) ![API](https://img.shields.io/badge/Gmail-API-red)
 
-### ☀️ Light Mode Theme
-![PriorityBox Light Mode Dashboard](screenshots/light-mode.png)
-
-### 🌙 Dark Mode Theme
-![PriorityBox Dark Mode Dashboard](screenshots/dark-mode.png)
-
+| | | | |
+|---------|----------|----------|----------|
+| <img src="Screenshots/Screenshot%20(1).png" width="250"/> | <img src="Screenshots/Screenshot%20(2).png" width="250"/> | <img src="Screenshots/Screenshot%20(3).png" width="250"/> | <img src="Screenshots/Screenshot%20(4).png" width="250"/> |
+| <img src="Screenshots/Screenshot%20(5).png" width="250"/> | <img src="Screenshots/Screenshot%20(6).png" width="250"/> | <img src="Screenshots/Screenshot%20(7).png" width="250"/> | <img src="Screenshots/Screenshot%20(8).png" width="250"/> |
 ---
 
 ## ✨ Features
