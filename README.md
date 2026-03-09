@@ -1,4 +1,4 @@
-# � PriorityBox - Real-time Email Monitoring Dashboard
+# PriorityBox - Real-time Email Monitoring Dashboard
 
 A modern full-stack web application that lets you monitor important emails in real-time. Log in with Google, add sender email addresses you care about, and get instant dashboard updates when new emails arrive.
 
